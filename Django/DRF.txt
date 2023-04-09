@@ -1,0 +1,138 @@
+API is the acronym for Application Programming Interface, which is a software intermediary that allows two applications to talk to each other.
+
+API is a middleman.
+Real life example: In a restaurant
+Customer = Client
+Kitchen = Server
+Waiter = API
+
+Django REST framework is a powerful and flexible toolkit for building Web APIs.
+
+##Installation of django Rest Framework(DRF)
+
+pip install djangorestframework
+
+goto project settings.py 
+go to INSTALLED_APPS add
+'rest_framework',
+
+Serialization 
+It is process of converting complex query sets ( like database model ojects) into python datatypes
+which is later converted into json/xml which is understable by frontend.
+
+Complex Querysets => python datatypes => json
+
+Deserialization
+Reverse process of serialization
+
+There are two types of serializer
+1. serialzers.Serializer
+2. serializers.ModelSerializer
+
+Requests in API
+
+GET => to retrieve item from database => @api_view(['GET'])
+POST => to add data into database @api_view(['GET', 'POST'])
+PUT => to update item in database @api_view(['PUT'])
+DELETE => to delete a item in database @api_view(['DELETE'])
+
+##Creating basic api using serializers.Serializer and GET Method
+
+//creating a project named watchmate and app named api
+
+django-admin startproject watchmate
+
+cd watchmate
+
+python manage.py startapp api
+
+goto project settings.py 
+go to INSTALLED_APPS add
+'api',
+'rest_framework',
+
+//On app models.py add following to create simple movie database
+
+class Movie(models.Model):
+    name = models.CharField(max_length=100)
+    description = models.TextField()
+    release_date = models.DateField()
+
+    def __str__(self):
+        return self.title
+
+//On admin.py add this line
+
+from .models import *
+
+admin.site.register(Movie)
+
+Create serializers.py file inside api folder
+
+
+
+//Inside serializers.py file add:
+
+from rest_framework import serializers
+from .models import *
+
+class MovieSerializer(serializers.Serializer):
+    name = serializers.CharField()
+    description = serializers.CharField()
+    release_date = serializers.DateField()
+
+//Inside views.py add
+
+#importing Movie model and MovieSerializer serializer
+from .models import Movie
+from .serializers import MovieSerializer
+
+#for function based view
+from rest_framework.decorators import api_view 
+from rest_framework.response import Response
+
+@api_view() #decorator default is GET
+def movieList(request):
+    movies = Movie.objects.all() #getting model object/querysets from database
+    serializer = MovieSerializer(movies, many=True) #converting querysets to python data
+    return Response(serializer.data) sending json response of python data
+
+@api_view()
+def movieDetail(request, pk):
+    movie = Movie.objects.get(id=pk)
+    serializer = MovieSerializer(movie)
+    return Response(serializer.data)
+
+//Inside main project urls.py add/modify
+
+from django.urls import path,include
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('movies/', include('api.urls')),
+]
+
+//create urls.py on api folder and add
+
+from django.urls import path
+from .views import *
+
+urlpatterns = [
+    path('list/', movieList),
+    path('<int:pk>/', movieDetail),
+]
+
+now run these commands
+
+python manage.py makemigrations
+python manage.py migrate
+python manage.py createsuperuser
+python manage.py runserver
+
+goto /admin and create some data
+
+goto /movies/list to view all movies list
+goto /movies/{id} to view individual movie detail
+
+
+

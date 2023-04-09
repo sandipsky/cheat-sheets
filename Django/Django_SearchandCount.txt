@@ -1,0 +1,71 @@
+##For counting
+Make a variable in view function in views.py
+
+Example Getting number of pending tasks in todo list
+
+count = Task.objects.filter(complete=False).count()
+
+count = Task.objects.all().count() 
+for all objects count
+
+count is variable name
+Task is model name imported from models.py
+(complete=False) is a filter
+
+
+def index(request):
+    tasks = Task.objects.all()
+    count = Task.objects.filter(complete=False).count()
+    context = {'tasks':tasks, 'count':count}
+    return render(request, 'index.html', context)
+
+
+------------------------------------------
+
+Counting foreign key item in list view
+
+from django.db.models import Count
+
+def index(request):
+    tasks = Task.objects.all().annotate(num_answers=Count('answer'))
+    context = {'tasks':tasks}
+    return render(request, 'index.html', context)
+
+use value of {{tasks.num_answers}}
+
+
+--------------------------------for searching---------------------------
+
+def index(request):
+    tasks = Task.objects.all()
+    search=""
+    if 'search' in request.GET:
+        search = request.GET['search']
+	tasks = Task.objects.filter(title__icontains=search)
+    else:
+        tasks = Task.objects.all()
+    context = {'tasks':tasks, 'search':search}
+    return render(request, 'index.html', context)
+
+Using multiple parameters
+from django.db.models import Q
+
+def index(request):
+    tasks = Task.objects.all()
+    search=""
+    if 'search' in request.GET:
+        search = request.GET['search']
+	multiple_search = Q(Q(first_name__icontains=search | Q(last_name__icontains=search))
+	tasks = Task.objects.filter(multiple_search)
+    else:
+        tasks = Task.objects.all()
+    context = {'tasks':tasks, 'search':search}
+    return render(request, 'index.html', context)
+
+
+On index.html 
+add this field
+<form action="" method="get">
+        <input type="text" name="search" value={{search}}>
+        <input type="submit" value="Search">
+</form>

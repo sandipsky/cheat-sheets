@@ -1,0 +1,6 @@
+from datetime import date
+
+current_date = date.today()
+date1 = date(2023, 3, 5)
+diff = current_date - date1
+day = diff.days

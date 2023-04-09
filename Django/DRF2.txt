@@ -1,0 +1,62 @@
+#Create / POST method
+add in movieList function on views.py 
+
+if request.method == 'POST':
+        serializer = MovieSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return Response(serializer.errors)
+
+in serializers.py on MovieSerializer class add
+
+def create(self, validated_data):
+        return Movie.objects.create(**validated_data)
+
+#UPDATE / PUT method
+
+add this in serializers.py MovieSerlializer class
+
+def update(self, instance, validated_data):
+        #instance.name is old name
+        instance.name = validated_data.get('name', instance.name)
+        instance.description = validated_data.get('description', instance.description)
+        instance.release_date = validated_data.get('release_date', instance.release_date)
+        instance.save()
+        return instance
+
+in views.py on movieDetail function add
+
+if request.method == 'PUT':
+        movie = Movie.objects.get(id=pk)
+        serializer = MovieSerializer(movie, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return Response(serializer.errors)
+
+
+#DELETE method
+
+in views.py add on movieDetail function
+
+from rest_framework import status
+
+if request.method == 'DELETE':
+        movie = Movie.objects.get(id=pk)
+        movie.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+#Including staus codes
+
+change 
+if request.method == 'GET':
+        try:
+            movie = Movie.objects.get(id=pk)
+        except Movie.DoesNotExist:
+            return Response({'error': 'Movie not found'}, status=status.HTTP_404_NOT_FOUND)
+        serializer = MovieSerializer(movie)
+        return Response(serializer.data)

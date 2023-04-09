@@ -1,0 +1,22 @@
+ubuntu: sudo apt install python3-pip python3-venv      
+Arch :sudo pacman -S python-pip python-venv
+
+add to .bashrc file 
+export PATH="/home/sandipsky/.local/bin:$PATH"
+
+python -m venv (envname)
+
+source envname/bin/activate
+
+deactivate
+
+
+#For Windows
+
+pip install virtualenv
+
+virtualenv (envname)
+
+(envname)\scripts\activate
+
+deactivate

@@ -1,0 +1,103 @@
+-----------------------------------Django python framework---------------------------------------------------
+
+Installation
+pip install django
+
+Create Project
+django-admin startproject (projectname)
+
+Create app( component of project) 
+python manage.py startapp (appname)
+
+add (appname) in settings.py INSTALLED_APPS[]
+
+django project files example projectname todo_list and app name todo
+
+--------------------------------------------------------------------------------------------------------
+
+----- BASIC file structure ---- 
+-todo_list
+ -todo_list(it creates folder of itself inside)
+	--settings.py( configuration file)
+	--urls.py ( main routing file)
+ -todo( app which we created)
+	-templates(create folder if need to store html files)
+	 -todo(necessary to create this folder)
+	--views.py(logic responsible for processing a user’s request and for returning the response)
+	--models.py(database file)(uses sqllite default change in settings.py)
+	--admin.py( add model class here to show up in admin site)
+	--urls.py( routing file of app)( need to create)
+ -manage.py ( main file used to run server)
+
+--------------------------------------------------------------------------------------------------------------
+
+
+-------Views.py -------------
+
+(Using function based views) in views.py
+create a function for view page
+
+def home(request):
+	return HttpResponse('home')
+
+--Using html files from templates
+create folder called templates inside app 
+and create (appname) folder inside templates folder
+create home.html file inside templates->(appname) folder
+
+def home(request):
+	return render(request, '(appname)/home.html')
+
+----------------------------------------------------------------------------------------------------------
+
+------ Basic URL Routing(urls.py) ------------
+In main project urls.py, change it to
+
+from django.urls import path, include
+
+urlpatterns = [
+	path('admin/', admin.site.urls),
+	path(''(or '(appname)/'), include('(appname).urls'),
+]
+
+Inside (appname) urls.py
+
+from django.urls import path
+from . import views
+urlpatterns = [	
+	path('', views.home),
+	path('products/', views.products),
+]
+
+-----------------------------------------------------------------------------------------------------------------
+
+------------Database Models( models.py)---------------------
+We need to create user to view and manipulate data
+
+python manage.py createsuperuser 
+
+class Task(models.Model):
+    title = models.CharField(max_length=200)
+    complete = models.BooleanField(default=False)
+    created = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title
+
+fix error when there is no photo in database 
+or use a default pic when there is no pic
+    @property
+    def get_photo_url(self):
+        if self.cover and hasattr(self.cover, 'url'):
+            return self.cover.url
+        else:
+            return "/static/images/1.jpg"
+
+
+-----------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+

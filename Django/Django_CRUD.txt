@@ -1,0 +1,169 @@
+create html files for following views
+
+list.html
+create.html
+detail.html
+update.html
+delete.html
+
+---------------------------------------------------------------------
+On forms.py
+
+from django.forms import ModelForm
+from .models import *
+
+class TaskForm(ModelForm):
+    class Meta:
+        model = Task
+        fields = '__all__'
+        widgets={
+            'title' : forms.TextInput(attrs={'class':'input', 'placeholder':'Enter task here'}),
+            'desc' : forms.Textarea(attrs={'class':'text-input'}),
+	    (to apply css on choice fields with foreign key)
+            'category' : forms.Select(attrs={'class':'text-input'}),
+        }
+
+
+
+---------------------------------------------------------------------
+On views.py
+
+from django.shortcuts import redirect, render
+from .models import *
+from .forms import *
+
+def listTask(request):
+    tasks = Task.objects.all()
+    count = Task.objects.filter(complete=False).count()
+    context = {'tasks':tasks, 'form':form, 'count':count}
+    return render(request, 'list.html', context)
+
+def createTask(request):
+    form = TaskForm()
+    if request.method == 'POST':
+        form = TaskForm(request.POST)
+        if form.is_valid():
+	    #to add logged in user as default
+	    form.instance.author = request.user
+            form.save()
+        return redirect('/') 
+    else:
+        form = PostForm()
+    context = {'form':form}
+    return render(request, 'create.html', context)
+
+//to upload images and other files
+	form = TaskForm(request.POST, request.FILES)
+
+def taskDetail(request, pk):
+    task = Task.objects.get(id=pk)
+    context = {'task':task}
+    return render(request, 'detail.html', context)   
+
+def updateTask(request, pk):
+    task = Task.objects.get(id=pk)
+    form = TaskForm(instance=task)
+    if request.method == 'POST':
+        form = TaskForm(request.POST, instance=task)
+        if form.is_valid():
+            form.save()
+        return redirect('/')
+    context = {'form':form}
+    return render(request, 'update.html', context)
+
+def deleteTask(request, pk):
+    item = Task.objects.get(id=pk)
+    if request.method == 'POST':
+        item.delete()
+        return redirect('/')
+    context = {'item':item}
+    return render(request, 'delete.html', context)
+
+----------------------------------------------------------------------
+
+------list.html-----
+
+<h1>My Todo List</h1>
+<h3>You have {{count}} pending Tasks!</h3>
+{% for task in tasks %}
+{% if task.complete == True %}
+<p>
+<strike>{{task}}</strike>
+{% else %}
+<span>{{task}}</span>
+//to use image
+<img src="{{task.img.url}} or {{task.get_photo_url}}">
+{% endif %} 
+<a class="btn1" href="{% url 'update' task.id %}">Update</a>
+<a class="btn2" href="{% url 'delete' task.id %}">Delete</a>
+</p>
+{% endfor %}
+
+-----------------------
+
+------create.html--------
+
+<form method="post">
+    {% csrf_token %}
+    {{form.title}} 
+    <input class="btn" type="submit" value="Add Task">
+</form>
+
+//for images or other files
+<form action="" method="post" enctype="multipart/form-data">
+
+------------------------
+
+-----detail.html-------
+
+<p>{{task.title}}</p>
+
+<p>{{task.created}}</p>
+
+<p>{{task.description}}</p>
+
+//to use image
+<img src="{{task.img.url}} or {{task.get_photo_url}}">
+
+-------------------------------
+
+
+----update.html-----
+
+<h3>Update Task</h3>
+
+<form method="post">
+    {% csrf_token %}
+    {{form.as_p}}
+    <input type="submit" value="Update">
+</form>
+
+------------------------
+
+-----delete.html-----
+
+<p>Are you sure you want to delete "{{item}}"?</p>
+
+<form action="" method="post">
+    {% csrf_token %}
+    <input type="submit" value="Confirm">
+</form>
+<a href="{% url 'list' %}">Cancel</a>
+
+
+--------------------------
+------------------------------------------------------------------------
+On urls.py
+
+from django.urls import path
+from . import views 
+
+urlpatterns = [
+    path('tasks/', views.taskList, name='tasks'),	
+    path('create/', views.createTask, name='create'),
+    path('task/<str:pk>', views.taskDetail, name='task'),
+    path('update/<str:pk>', views.updateTask, name='update'),
+    path('delete/<str:pk>', views.deleteTask, name='delete'),
+]
+
+---------------------------------------------------------------------------------

@@ -1,0 +1,173 @@
+On forms.py
+
+from django import forms
+from django.forms import ModelForm
+from .models import *
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import User
+
+class CreateUser(UserCreationForm):
+    password1 = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class':'text-input', 'placeholder':'Enter your password'}),
+    )
+    password2 = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class':'text-input', 'placeholder':'Confirm password'}),
+    )
+    email = forms.EmailField(
+        required=False,
+        widget=forms.EmailInput(attrs={'class': 'text-input', 'placeholder':'Enter your Email'})
+    )
+    username = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'text-input', 'placeholder':'Enter your username'})
+    )
+    first_name = forms.CharField(
+	required=False,
+        widget=forms.TextInput(attrs={'class': 'text-input', 'placeholder':'First Name'})
+    )
+    last_name = forms.CharField(
+	required=False,
+        widget=forms.TextInput(attrs={'class': 'text-input', 'placeholder':'Last Name'})
+    )
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'email', 'username' , 'password1', 'password2']
+    
+
+    def clean_username(self):
+        username = self.cleaned_data.get("username")
+        if User.objects.filter(username=username).exists():
+            raise forms.ValidationError("Username already taken")
+        return username
+
+    def clean_email(self):
+        email = self.cleaned_data.get("email")
+        if User.objects.filter(email=email).exists() and email !="":
+            raise forms.ValidationError("Email is already used")
+        return email
+    
+    def clean_password2(self):
+        password1 = self.cleaned_data.get("password1")
+        password2 = self.cleaned_data.get("password2")
+        if password1 != password2:
+            raise forms.ValidationError("Password don\'t match")
+        return password2
+
+class UserEditForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ('first_name', 'last_name', 'email')
+
+
+class ProfileEditForm(forms.ModelForm):
+    class Meta:
+        model = Profile
+        fields = ('date_of_birth', 'photo')
+
+On views.py
+
+def register(request):
+    form = CreateUser(request.POST)
+    if request.method == 'POST':
+        form = CreateUser(request.POST)
+        if form.is_valid():
+            new_user = form.save(commit=False)
+            new_user.save()
+            Profile.objects.create(user=new_user)
+            return redirect('login')
+    else:
+        form = CreateUser()
+    context = {
+        'form' : form
+    }
+    return render(request, 'register.html', context)
+
+@login_required
+def editUser(request):
+    if request.method == 'POST':
+        user_form = UserEditForm(instance=request.user, data=request.POST)
+        profile_form = ProfileEditForm(instance=request.user.profile, data=request.POST, files=request.FILES)
+        if user_form.is_valid() and profile_form.is_valid():
+            user_form.save()
+            profile_form.save()
+            messages.success(request, 'Profile updated successfully')
+        else:
+            messages.error(request, 'Error updating your profile')
+    else:
+        user_form = UserEditForm(instance=request.user)
+        profile_form = ProfileEditForm(instance=request.user.profile)
+
+    return render(request, 'edit.html', {'user_form':user_form, 'profile_form':profile_form})
+
+On models.py for profile
+
+from django.db import models
+from django.contrib.auth.models import User
+
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    date_of_birth = models.DateField(blank=True, null=True)
+    photo = models.ImageField(upload_to='users/%Y/%m/%d/', blank=True)
+
+    def __str__(self):
+        return f'Profile for user {self.user.username}'
+
+On register.html
+
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="auth-content">
+        <form action="" method="post">
+            {% csrf_token %}
+            <h2 class="form-title">Sign Up</h2>
+            
+            <div>
+                <label for="username">Username</label>
+               
+                    {{form.username}} 
+            </div>
+            {% if form.username.errors %}
+            <div class="form-errors">
+            <span>{{form.username.errors|striptags}}</span>
+            </div>
+            {% endif %}
+            
+            <div>
+                <label for="email">Email</label>
+                {{form.email}}
+                
+            </div>
+            {% if form.email.errors %}
+            <div class="form-errors">
+            <span>{{form.email.errors|striptags}}</span>
+            </div>
+            {% endif %}
+
+            <div>
+                <label for="password1">Password</label>
+                {{form.password1}}
+            </div>
+            {% if form.password1.errors %}
+            <div class="form-errors">
+            <span>{{form.password1.errors|striptags}}</span>
+            </div>
+            {% endif %}
+
+            <div>
+                <label for="password2">Confirm Password</label>
+                {{form.password2}}
+            </div>
+            {% if form.password2.errors %}
+            <div class="form-errors">
+            <span>{{form.password2.errors|striptags}}</span>
+            </div>
+            {% endif %}
+            <div>
+                <input type="submit" class="btn btn-big" name="register-btn" value="Sign Up">
+            </div>
+            <p>Already have an account? <a href="{% url 'login' %}">Login</a></p>
+
+        </form>
+</div>
+
+{% endblock %}

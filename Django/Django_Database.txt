@@ -1,0 +1,16 @@
+on settings.py 
+
+create database using phpmyadmin or mql first
+here i created name 'django'
+
+#change it to 
+DATABASES = {
+'default': {
+'ENGINE': 'django.db.backends.mysql',
+'NAME': 'django',
+'USER':'root',
+'PASSWORD':'',
+'HOST':'localhost',
+'PORT':'3306'
+}
+}

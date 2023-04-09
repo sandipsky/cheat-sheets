@@ -1,0 +1,59 @@
+<!-- font awesome -->
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" integrity="sha384-DyZ88mC6Up2uqS4h/KRgHuoeGwBcD4Ng9SiP4dIRy0EXTlnuz47vAwmeGwVChigm" crossorigin="anonymous"/>
+
+in css file
+@import url('https://fonts.googleapis.com/css2?family=Fira+Sans&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fira+Sans:wght@900&display=swap');
+
+font-family: 'Fira Sans';
+
+Icons
+
+#SocialMedia
+Facebook
+<i class="fab fa-facebook-f"></i>
+Twitter
+<i class="fab fa-twitter"></i>
+LinkedIn
+<i class="fab fa-linkedin"></i>
+
+
+Hamburger Menu
+<i class="fa fa-bars"></i>
+
+Left and Right
+<i class="fas fa-chevron-left"></i>
+alt
+<i class="fa fa-angle-left"></i>
+
+<i class="fas fa-chevron-right"></i>
+
+Dropdown
+<i class="fa fa-chevron-down"></i>
+
+User
+<i class="fa fa-user"></i>
+
+Calendar
+<i class="far fa-calendar"> Mar 8, 2022</i>
+
+Phone
+<i class="fa fa-phone"></i>
+
+Email
+<i class="fa fa-envelope"></i>
+
+Cart
+<i class="fa fa-shopping-cart"></i>
+
+Login
+<i class="fa fa-lock"></i>
+
+Star
+<i class="fa fa-star"></i>
+
+Home
+<i class="fa fa-house"></i>
+
+Network
+<i class="fa fa-network-wired">

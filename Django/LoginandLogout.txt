@@ -1,0 +1,69 @@
+On views.py
+
+def loginUser(request):
+    if request.method == 'POST':
+        username = request.POST['username']
+        password = request.POST['password']
+
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            return redirect('index')
+        elif not User.objects.filter(username=username).exists():
+            return render(request, 'login.html', {'error': 'User not found'})
+        else:
+            return render(request, 'login.html', {'error': 'Username or Password is Incorrect'})
+    return render(request, 'login.html')
+
+
+def logoutUser(request):
+    logout(request)
+    return redirect('login')
+
+On urls.py
+
+path('login/', views.loginUser, name='login'),
+    path('logout/', views.logoutUser, name='logout'),
+
+
+On login.html 
+
+
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="auth-content"> 
+
+    <h1 class="form-title">Login</h1>
+    <br><br><br>
+    <form method="post">
+        {% csrf_token %}
+        {% if error %}
+        <div class="form-errors">
+            <span>{{error}}</span>
+        </div>
+        {% endif %}
+        <div>
+            <label for="username"><h3>Username</h3></label>
+            <input type="text" name="username" class="text-input" required>
+           
+        </div>
+
+
+        <div>
+            <label for="password1"><h3>Password</h3></label>
+            <input type="password" name="password" class="text-input" required>
+           
+        </div>
+
+        <input type="submit" class="btn" value="Login">
+        <br><br>
+        <p>Don't have an account? <a href="{% url 'register' %}">Sign Up</a></p>
+        
+    
+
+    </form>
+</div>
+
+{% endblock %}

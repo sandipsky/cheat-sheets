@@ -1,0 +1,80 @@
+--------Template Inheritance ----------------
+create file called base.html( base template) and inside that --
+<html>
+<head>
+<title>Main</title>
+</head>
+<body>
+<h1>Navbar</h1>
+{% block content %}
+//child template stays here
+{% endblock %}
+</body>
+</html>
+ 
+create a child template example home.html and inside that
+{% extends '(appname)/base.html' %}
+{% block content %}
+//content
+{% endblock %}
+
+You can also include other html file inside a html file
+<html>
+<head>
+<title>Main</title>
+</head>
+<body>
+{% include '(appname)/navbar.html %}
+{% block content %}
+//child template stays here
+{% endblock %}
+</body>
+</html>
+
+--If u want to add bootstrap/CSS and Javascript files then link them in main.html 
+
+
+-------------Static Files------------------------------
+create folder named static in project root
+create folders named css, js, images to store respective files
+
+-(projectfolder)
+	-static
+		-css(contains css files)
+			--style.css
+		-js(contains js files)
+			--main.js
+		-images(contains images files)
+
+on settings.py add 
+import os
+(at the begining)
+
+STATIC_URL = '/static/'
+#STATIC_ROOT = '/static/'
+STATICFILES_DIRS = [
+	os.path.join(BASE_DIR, 'static')
+]
+
+
+----For images
+
+MEDIA_URL = '/media/'
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+ON project(main) urls.py add
+from django.conf import settings
+from django.conf.urls.static import static
+
+urlpatterns = [
+	............
+]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+create link for static files on main.html
+put this on beginning of every html pages even in base.html -- 
+{% load static %}
+
+<link rel="stylesheet" type="text/css" href="{% static '/css/main.css' %}">
+
+-----------------------------------------------------------------------------------------------------------------------------

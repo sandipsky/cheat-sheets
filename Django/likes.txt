@@ -1,0 +1,18 @@
+votes = models.IntegerField(default=0, null=True, blank=True)
+
+class Vote(models.Model):
+    answer = models.ForeignKey(Answer, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+
+def addvote(request, pk):
+    answer = Answer.objects.get(id=pk)
+    votes = Vote.objects.filter(user=request.user, answer=answer).count()
+    if votes > 0:
+        Vote.objects.filter(user=request.user, answer=answer).delete()
+        answer.votes -= 1
+    else:
+        Vote.objects.create(user=request.user, answer=answer)
+        answer.votes += 1
+    answer.save()
+    return HttpResponseRedirect(reverse('qnaapp:questiondetail', args=[answer.question.id]))
